@@ -3,9 +3,14 @@ A Windows batch file to provide command-line control of any Wemo smart plug. Use
 
 Tested with Wemo Smart Switch and Wemo Mini, but this should work with other Wemo smart plugs/switches as well.  
   
-No installation necessary.  Simply place this batch file anywhere in your Windows file system and run it via cmd terminal or create your own Windows shortcuts.  
+## Setup:
+Requires curl:  https://curl.se/windows/
+
+Simply place this batch file anywhere in your Windows file system and run it via cmd terminal or create your own Windows shortcuts.
   
 Sorry, this script is not sophisticated enough to search for devices yet.  Perhaps in a future version.  For now, you'll need to find out the IP address of your target switch by other means (e.g. your router's list of connected devices, Fing app, Wemo app, etc).  
+  
+## Running the tool:  
   
 Usage:  
         wemo IPADDRESS [info|check|state|on|off]  
