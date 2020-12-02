@@ -2,6 +2,15 @@
 
 REM  usage:  wemo IPAddress (on|off|check|state|info)
 
+:: Make sure CURL command is available:
+curlx -V >nul 2>&1 || (
+	echo Error, the curl command does not appear to be available on this machine.
+	echo If you're using Windows 10, run windows update to make sure your OS is up to date.
+	echo Otherwise, you can download the curl tool here:  https://curl.se
+	goto done
+)
+
+
 :: Get input arguments
 set IP=%1
 set INSTRUCTION=%2
