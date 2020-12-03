@@ -22,10 +22,10 @@ wemo [instruction (info|check|state|on|off|scan)] [IPAddress1 (optional)] [IPAdd
 ```
 * Ordering of arguments isn't critical.  You can put the *instruction* 1as the first or last argument, or anywhere in between.  
 * The **_info_**, **_check_**, **_state_**, **_on_**, and **_off_** control and status instructions require one IPAddress argument, the address of the target switch.  
-* The **_scan_** instruciton requires zero or two IP address arguments.  
+* The **_scan_** instruction requires zero or two IP address arguments.  
   * If *no* IP address arguments are provided, this script gets the host PC's local IP address and scans all addresses with same base, and suffix ranging from 2 to 254.  This full scan takes about 2 minutes to complete.
   * If *2* IP address arguments are provided, this script scans from the first address to the second, inclusively.  Scanning a limited range can be much faster than a full scan.
-  * Scan results are not saved in any way, they are simply displayed as information only.  The user can use this information to choose an IP address to use with control and status commands.
+  * Scan results are not stored in any way.  Results are displayed as information only, to inform the user's selection of IP address(es) to use with control and status instructions.
   
 ### Examples:  
 ```
