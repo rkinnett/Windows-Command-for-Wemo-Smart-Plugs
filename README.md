@@ -14,7 +14,7 @@ You can run this script form the command line (cmd.exe) or you can create a Wind
   
 This script can get information about a single switch at a specified IP address, check the state of the switch, or turn it on or off.  
   
-This script can also scan your network for Wemo switches and display information about each detected switch.  If no arguments are provided with the scan instruction, the script gets your IP address then scans all IP addresses with the same first three octets, incrementing the fourth octet from 2 to 254.  Each IP address takes about half a second, so a full-range scan takes about 2 minutes.  If you happen to know the expected range of IP addresses then you can speed up the scan by specifying start and end IP addresses to check, as shown in the example below.  
+This script can also scan your network for Wemo switches and display information about each detected switch.  If no arguments are provided with the scan instruction, the script gets your IP address then scans all IP addresses with the same base address (same first three octets), incrementing the fourth octet from 2 to 254.  Each IP address takes about half a second to check and a full-range scan takes about 2 minutes.  If you happen to know the expected range of IP addresses then you can speed up the scan by specifying start and end IP addresses to check, as shown in the example below.  
   
 ### Usage:  
         wemo [instruction (info|check|state|on|off|scan)] [IPAddress1 (optional)] [IPAddress1 (optional)]
