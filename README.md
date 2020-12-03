@@ -27,6 +27,6 @@ This script can also scan your network for Wemo switches and display information
         wemo scan  
         wemo scan 192.168.1.100 192.168.1.120  
     
-If you happen to hook a bunch of Christmas lights up to Wemo switches and use this script to turn them on and off in sequence to the tune of "Christmas Eve/Sarajev", by all means PLEASE POST A VIDEO AND LET ME KNOW!  :)  
+If you happen to hook a bunch of Christmas lights up to Wemo switches and use this script to turn them on and off in sequence to the tune of "Christmas Eve/Sarajevo", BY ALL MEANS PLEASE POST A VIDEO AND LET ME KNOW!  :)  
   
 "With great power.." or somesuch. Don't be evil!  
