@@ -12,7 +12,7 @@ For troubleshooting purposes, if you know the IP address of your Wemo switch, yo
 `curl -silent http://192.188.1.100:49153/setup.xml`  
   
 ## Setup:
-Download wemo.bat from the link above (click wemo.bat, then right-click the "Raw" botton and select Save-as) and save it anywhere you like.
+Download wemo.bat from the above links or right-click [here](https://github.com/rkinnett/Windows-Command-for-Wemo-Smart-Plugs/raw/main/wemo.bat "wemo.bat page"), select Save-as, and save wemo.bat anywhere you like.
   
 ## Running the tool:  
 You can run this script form the command line (cmd.exe) or you can create a Windows shortcut to this file with arguments.  For example, you could create a shortcut called "Turn on lamp" with "C:\path\to\wemo.bat 192.168.1.100 on" as the target location (substituting the target IP address and full path to wemo.bat), and give it a lightbulb icon!    
