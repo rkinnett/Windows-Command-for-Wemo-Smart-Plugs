@@ -1,6 +1,8 @@
 # Windows-Command-for-Wemo-Smart-Plugs
 A Windows batch script to detect and control Wemo smart plugs.  
   
+This script can scan your network for Wemo switches and display information about each detected switch, query a specific switch for information or state, or turn a specific switch on or off.  
+  
 ## Requirements
 Requires one or more Wemo switches registered to your network and pingable from your PC.  
   
@@ -13,9 +15,7 @@ For troubleshooting purposes, if you know the IP address of your Wemo switch, yo
 Download wemo.bat from the link above (click wemo.bat, then right-click the "Raw" botton and select Save-as) and save it anywhere you like.
   
 ## Running the tool:  
-You can run this script form the command line (cmd.exe) or you can create a Windows shortcut to this file with arguments.  For example, you could create a shortcut called "Turn on lamp" with "wemo 192.168.1.100 on" as the target location, and give it a lightbulb icon!  
-  
-This script can get information about a single switch at a specified IP address, check the state of the switch, or turn it on or off.  
+You can run this script form the command line (cmd.exe) or you can create a Windows shortcut to this file with arguments.  For example, you could create a shortcut called "Turn on lamp" with "C:\path\to\wemo.bat 192.168.1.100 on" as the target location (substituting the target IP address and full path to wemo.bat), and give it a lightbulb icon!    
   
 ### Usage:  
 ```
