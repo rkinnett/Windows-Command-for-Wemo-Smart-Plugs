@@ -6,13 +6,13 @@ This script can scan your network for Wemo switches and display information abou
 ## Requirements
 Requires one or more Wemo switches registered to your network and pingable from your PC.  
   
-Requires the **_curl_** command which is included in Windows 10 but not earlier versions.  If you're using an older version of Windows or your system is not up to date, you can download curl from here: https://curl.se/windows/.  The binary curl.exe file must be in your command path, either inside one of the directories listed in your PATH environment variable, or placed inside the same directory as this batch script.  
+Requires the **_curl_** command which is included in Windows 10 but not earlier versions.  If you're using an older version of Windows or your system is not up to date, you can download curl from here: https://curl.se/windows/.  The binary curl.exe file must be on your command path, either inside one of the directories listed in your PATH environment variable, or placed inside the same directory as this batch script.  
   
 For troubleshooting purposes, if you know the IP address of your Wemo switch, you can test network accessibility from the curl command as follows (substitute your switch IP address):  
 `curl -silent http://192.188.1.100:49153/setup.xml`  
   
 ## Setup:
-Download wemo.bat from the above links or right-click [here](https://github.com/rkinnett/Windows-Command-for-Wemo-Smart-Plugs/raw/main/wemo.bat "wemo.bat page"), select Save-as, and save wemo.bat anywhere you like.
+Download wemo.bat from project links above, or right-click [here](https://github.com/rkinnett/Windows-Command-for-Wemo-Smart-Plugs/raw/main/wemo.bat "wemo.bat page"), select Save-as, and save wemo.bat anywhere you like.
   
 ## Running the tool:  
 You can run this script form the command line (cmd.exe) or you can create a Windows shortcut to this file with arguments.  For example, you could create a shortcut called "Turn on lamp" with "C:\path\to\wemo.bat 192.168.1.100 on" as the target location (substituting the target IP address and full path to wemo.bat), and give it a lightbulb icon!    
