@@ -41,3 +41,6 @@ wemo scan 192.168.1.100 192.168.1.120
 If you happen to hook a bunch of Christmas lights up to Wemo switches and use this script to turn them on and off in sequence to the tune of "Christmas Eve/Sarajevo", BY ALL MEANS PLEASE POST A VIDEO AND LET ME KNOW!  :)  
   
 "With great power.." or somesuch. Don't be evil!  
+  
+## Feedback
+If you found this project useful, or didn't, please let me know!  All questions, suggestions, complaints, and success stories are welcome here:  https://discord.gg/uFQWtcMw
