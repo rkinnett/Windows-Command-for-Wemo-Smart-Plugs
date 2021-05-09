@@ -1,6 +1,8 @@
 @ECHO OFF
 SETLOCAL
 
+SET PATH=%PATH%;%~dp0
+
 :: set to debugON to enable debug messages:
 set DEBUG=debugOFF
 
