@@ -1,9 +1,10 @@
 @ECHO OFF
-SETLOCAL
+SETLOCAL EnableDelayedExpansion
 
-SET PATH=%PATH%;%~dp0
+:: if the parent directory of this script is not in the PATH environment variable, then temporarily add it, in case curl.exe is in this directory.
+echo %PATH%| find /C /I "%~dp0" >nul || SET PATH=%PATH%;%~dp0
 
-:: set to debugON to enable debug messages:
+:: set DEBUG to "debugON" to enable debug messages:
 set DEBUG=debugOFF
 
 set "SYNTAX=instruction^(on^|off^|check^|state^|info^|scan^) ipaddress1^(optional^) ipaddress2^(optional^) debug^(optional^)"
@@ -13,7 +14,6 @@ set PORT=49153
 set INSTRUCTION=
 set IP1=
 set IP2=
-
 
 
 :: Parse command arguments:
@@ -30,16 +30,20 @@ for %%a in (%*) do (
       set INSTRUCTION=%%a
     ) else (
       :: test if this arg looks like an IP address:
-      call :checkIPFormat "%%a" isValid?
-      if "%isValid?%"=="TRUE" (
+      call :checkIPFormat "%%a" isValidIP?      
+      if "%DEBUG%"=="debugON" echo "%%a" is valid IP: "!isValidIP?!"
+      if "!isValidIP?!"=="TRUE" (
         if not defined IP1 (
           set IP1=%%a
-        ) else if not errorlevel 1 (
+        ) else if not defined IP2 (
           set IP2=%%a
+        ) else (
+          echo error: unrecognized third IP address arg "%%a"
+          goto done
         )
       ) else (
-        :: warn of unsupported arg:
-        echo warning: ignoring unrecognized arg "%%a"
+        echo error: unrecognized arg "%%a"
+        goto done
       )
     )
   )
@@ -76,12 +80,12 @@ curl -V >nul 2>&1 || (
 
 
 :: Route command:
-if "%INSTRUCTION%"=="state" call :checkState    & goto done
-if "%INSTRUCTION%"=="check" call :checkState    & goto done
-if "%INSTRUCTION%"=="info"  call :getInfo       & goto done
-if "%INSTRUCTION%"=="on"    call :setState ON   & goto done
-if "%INSTRUCTION%"=="off"   call :setState OFF  & goto done
-if "%INSTRUCTION%"=="scan"  call :scan          & goto done
+if "%INSTRUCTION%"=="state" call :checkState       & goto done
+if "%INSTRUCTION%"=="check" call :checkState %IP1% & goto done
+if "%INSTRUCTION%"=="info"  call :getInfo %IP1%    & goto done
+if "%INSTRUCTION%"=="on"    call :setState ON      & goto done
+if "%INSTRUCTION%"=="off"   call :setState OFF     & goto done
+if "%INSTRUCTION%"=="scan"  call :scan             & goto done
 echo "shouldn't be here"
 goto done
 
@@ -94,23 +98,34 @@ ENDLOCAL
 
 
 :getInfo
-SETLOCAL
-set "arg=%~1"
-call :checkIPFormat "%arg%" isvalid?
-if "%isvalid?%"=="TRUE" (
-  set "checkaddr=%arg%"
-) else (
-  set "checkaddr=%IP1%"
+SETLOCAL EnableDelayedExpansion
+if not "%~1"=="" (
+  echo getInfo "%~1"
+  call :checkIPFormat "%~1" isValidIP?
+  if "!isValidIP?!"=="TRUE" (
+    set "checkaddr=%~1"
+  ) else (
+    echo getInfo error: first arg "%~1" is not valid IP
+    goto done
+  )
 )
 call :requireAddress %checkaddr%
 echo Getting info from switch at %checkaddr% ...
-curl -silent http://%checkaddr%:%PORT%/setup.xml >> %TEMP%\wemoinfo
+set curlCmd=curl -silent http://%checkaddr%:%PORT%/setup.xml
+if "%DEBUG%"=="debugON" echo curl command:   %curlCmd%
+%curlCmd%>> %TEMP%\wemoinfo
 for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<friendlyName" %TEMP%\wemoinfo')   do (echo Name:   %%i)
 for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<modelName" %TEMP%\wemoinfo')      do (echo Model:  %%i)
-for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<BinaryState" %TEMP%\wemoinfo')    do (echo State:  %%i)
 for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<SignalStrength" %TEMP%\wemoinfo') do (echo Signal: %%i)
 for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<macAddress" %TEMP%\wemoinfo')     do (echo MAC:    %%i)
 for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<serialNumber" %TEMP%\wemoinfo')   do (echo Serial: %%i)
+for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<BinaryState" %TEMP%\wemoinfo') do (
+  if "%DEBUG%"=="debugON" echo return value: %%i
+  if "%%i"=="0" (set "switchstate=%%i (OFF)" ) else (^
+  if "%%i"=="1" (set "switchstate=%%i (ON)"  ) else (^  
+                 set "switchstate=UNKNOWN"   ))
+)
+echo State:  %switchstate%
 @del %TEMP%\wemoinfo
 ENDLOCAL
 EXIT /B 0
@@ -119,13 +134,19 @@ EXIT /B 0
 
 :checkState
 SETLOCAL
-echo Checking state..
+if not defined IP1 (
+  echo checkState: error, no IP address specified
+  goto done
+)
+echo Checking state..  %IP1%
 call :requireAddress %IP1%
-curl -A "" -X POST ^
+set curlCmd=curl -A "" -X POST ^
 -H "Content-type: text/xml; charset=\"utf-8\"" ^
 -H "SOAPACTION: \"urn:Belkin:service:basicevent:1#GetBinaryState\"" ^
 -s http://%IP1%:%PORT%/upnp/control/basicevent1 ^
---data "<?xml version=\"1.0\" encoding=\"utf-8\"?> <s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <s:Body> <u:GetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\"/> </s:Body> </s:Envelope>" >> %TEMP%\wemostatus
+--data "<?xml version=\"1.0\" encoding=\"utf-8\"?> <s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <s:Body> <u:GetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\"/> </s:Body> </s:Envelope>"
+if "%DEBUG%"=="debugON" echo curl command:   %curlCmd%
+%curlCmd% >> %TEMP%\wemostatus
 for /f "delims=<> tokens=2" %%i in ('findstr /i /c:"<BinaryState" %TEMP%\wemostatus') do (
   if "%DEBUG%"=="debugON" echo return value: %%i
   if "%%i"=="0" (set "switchstate=%%i (OFF)" ) else (^
@@ -141,6 +162,10 @@ EXIT /B 0
 
 :setState
 SETLOCAL
+if not defined IP1 (
+  echo setState: error, no IP address specified
+  goto done
+)
 if "%~1"=="ON" (
   set toBinaryState=1
 ) else (
@@ -153,11 +178,13 @@ if "%~1"=="ON" (
 )
 call :requireAddress %IP1%
 echo Turning switch %~1 ..
-curl -A "" -X POST ^
+set curlCmd=curl -A "" -X POST ^
   -H "Content-type: text/xml; charset=\"utf-8\"" ^
   -H "SOAPACTION: \"urn:Belkin:service:basicevent:1#SetBinaryState\"" ^
   -s http://%IP1%:%PORT%/upnp/control/basicevent1 ^
-  -d "<?xml version=\"1.0\" encoding=\"utf-8\"?> <s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <s:Body> <u:SetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\"> <BinaryState> %toBinaryState% </BinaryState> </u:SetBinaryState> </s:Body> </s:Envelope>" >NUL
+  -d "<?xml version=\"1.0\" encoding=\"utf-8\"?> <s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\" s:encodingStyle=\"http://schemas.xmlsoap.org/soap/encoding/\"> <s:Body> <u:SetBinaryState xmlns:u=\"urn:Belkin:service:basicevent:1\"> <BinaryState> %toBinaryState% </BinaryState> </u:SetBinaryState> </s:Body> </s:Envelope>"
+if "%DEBUG%"=="debugON" echo curl command:   %curlCmd%
+%curlCmd% >NUL
 call :checkState
 ENDLOCAL
 EXIT /B 0
@@ -169,7 +196,6 @@ SETLOCAL EnableDelayedExpansion
 set myaddr=
 set counter=0
 set ipmask=
-set isValid?=
 
 if defined IP1 (
   for /f "tokens=1,2,3,4 delims=." %%a IN ("%IP1%") DO (
@@ -180,9 +206,9 @@ if defined IP1 (
   if "%DEBUG%"=="debugON" echo Getting your IP address to determine scan range
   call :getMyAddress myaddr
   if "%DEBUG%"=="debugON" echo your IP: "!myaddr!"
-  call :checkIPFormat "!myaddr!" isValid?
-  if "%DEBUG%"=="debugON" echo your ip address: "!myaddr!" is valid: "!isValid?!"
-  if "!isValid?!"=="TRUE" (
+  call :checkIPFormat "!myaddr!" isValidIP?
+  if "%DEBUG%"=="debugON" echo your ip address: "!myaddr!" is valid: "!isValidIP?!"
+  if "!isValidIP?!"=="TRUE" (
     for /f "tokens=1,2,3,4 delims=." %%a IN ("!myaddr!") DO (
       set "ipmask=%%a.%%b.%%c."
       set lastoctetStart=2
@@ -207,10 +233,10 @@ set "scanFirstAddress=!ipmask!!lastoctetStart!"
 set "scanLastAddress=!ipmask!!lastoctetEnd!"
 
 :: Make sure start and end addresses are valid:
-call :checkIPFormat !scanFirstAddress! isValid?
-if "!isValid?!"=="FALSE" (echo Error setting start address; call :halt 1)
-call :checkIPFormat !scanLastAddress! isValid?
-if "!isValid?!"=="FALSE" (echo Error setting end address; call :halt 1)
+call :checkIPFormat !scanFirstAddress! isValidIP?
+if "!isValidIP?!"=="FALSE" (echo Error setting start address; call :halt 1)
+call :checkIPFormat !scanLastAddress! isValidIP?
+if "!isValidIP?!"=="FALSE" (echo Error setting end address; call :halt 1)
 
 :: Scan:
 echo Scanning from !scanFirstAddress! to !scanLastAddress!
@@ -236,12 +262,6 @@ EXIT /B 0
 
 :::::::::::::::  HELPER FUNCTIONS:   :::::::::::::::  
 
-:SetValue
-SETLOCAL
-set "val1=3"
-set "val2=10"
-ENDLOCAL & set "%~1=%val1%" & set "%~2=%val2%"
-EXIT /B 0
 
 
 :requireAddress
@@ -257,7 +277,9 @@ EXIT /B 0
 set "url=%~1:%PORT%"
 set found?=
 if "%DEBUG%"=="debugON" echo Probing %url%
-curl --max-time 0.3 -s %url% | find /i "404" >NUL
+set curlCmd=curl --max-time 0.3 -s %url%
+if "%DEBUG%"=="debugON" echo curl command:   %curlCmd%
+%curlCmd%| find /i "404" >NUL
 if not errorlevel 1 (
   set "found?=TRUE"
 ) else (
