@@ -9,8 +9,10 @@ Requires one or more Wemo switches registered to your network and pingable from 
 Requires the **_curl_** command which is included in Windows 10 but not earlier versions.  If you're using an older version of Windows or your system is not up to date, you can download curl from here: https://curl.se/windows/.  The binary curl.exe file must be on your command path, either inside one of the directories listed in your PATH environment variable, or placed inside the same directory as this batch script.  
   
 For troubleshooting purposes, if you know the IP address of your Wemo switch, you can test network accessibility from the curl command as follows (substitute your switch IP address):  
-`curl -silent http://192.188.1.100:49153/setup.xml`  
-  
+`curl http://192.188.1.100:49153/setup.xml`  
+
+This query should return a bunch of xml if your switch is listening on port 49153.  If you get connection timeout, then you might have the wrong IP address or the switch is not reachable for some other reason.  Try pinging the IP address.  If the curl query returns "connection refused", then your switch might be configured to listen on a different port.  Try repeating the test above, substituting port numbers between 49151 and 49155 in place of :49153.  If you get a response on some port other than 49153, then you will need to edit line 12 of the batch file to set the destination port number to the value that worked.
+
 ## Setup:
 Download wemo.bat from project links above, or right-click [here](https://github.com/rkinnett/Windows-Command-for-Wemo-Smart-Plugs/raw/main/wemo.bat "wemo.bat page"), select Save-as, and save wemo.bat anywhere you like.
   
